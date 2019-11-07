@@ -10,7 +10,7 @@ RESULT=0
 if [ $CI ]; then
   echo "Script is running on CI"
   SFDX_CLI_EXEC=node_modules/sfdx-cli/bin/run
-  TARGET_ORG="packagingorg"
+  TARGET_ORG="HubOrg"
 fi
 
 PACKAGE_VERSION="$($SFDX_CLI_EXEC force:package:version:create -p dreamhouse -x -w 10 --json)"
