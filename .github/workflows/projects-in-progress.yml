@@ -64,7 +64,7 @@ jobs:
           args: force:org:open --urlonly --targetusername=new-user --json
       - name: Generate Email Script
         if: steps.check.outputs.isMatch == 'true'
-        run: "scripts/generateSendEmail.js"
+        run: "scripts/generateSendEmailScript.js"
         env:
           DISPLAY_USER_JSON: ${{ steps.display_user.outputs.result }}
           DISPLAY_URL_JSON: ${{ steps.display_url.outputs.result }}
