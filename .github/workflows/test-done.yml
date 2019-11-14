@@ -1,0 +1,22 @@
+name: Starting a new work item
+
+on:
+  project_card:
+    types: [moved]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check parsing of issue
+        id: issue
+        shell: bash
+        run: |
+          value=$(basename ${{ github.event.project_card.content_url }})
+          echo ::set-output name=issue_number::$value
+      - name: Echo issue
+        shell: bash
+        run: |
+          value=$(basename ${{ github.event.project_card.content_url }})
+          echo ${{ steps.issue.outputs.issue_number }}
