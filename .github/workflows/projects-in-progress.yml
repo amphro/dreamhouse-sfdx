@@ -86,8 +86,15 @@ jobs:
           result=${{ toJSON(steps.display_org.outputs.result) }}
           sfdxurl=$(echo $result | jq -r .result.sfdxAuthUrl)
           echo $sfdxurl >> scratch-org-authurl.txt
+      - name: Parse issue number
+        id: issue
+        if: steps.check.outputs.isMatch == 'true'
+        shell: bash
+        run: |
+          value=$(basename ${{ github.event.project_card.content_url }})
+          echo ::set-output name=issue_number::$value
       - name: Stash scratch auth file
         uses: actions/upload-artifact@v1
         with:
-          name: $(basename ${{ github.event.project_card.content_url }})
+          name: ${{ steps.issue.outputs.issue_number }}
           path: scratch-org-authurl.txt
