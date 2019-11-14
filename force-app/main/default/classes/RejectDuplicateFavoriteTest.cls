@@ -16,7 +16,7 @@ public class RejectDuplicateFavoriteTest {
     static testMethod void acceptNonDuplicate() {
         Boolean success = true;
         try {
-            Property__c p = new Property__c();
+            Property__c p = new Property__c(Price__c=200000, Address__c='123 Test Ave', City__c='Boston', Zip__c='12345');
             insert p;
             User u = getTestUser();
             insert u;
@@ -33,7 +33,7 @@ public class RejectDuplicateFavoriteTest {
     static testMethod void rejectDuplicate() {
         Boolean success = true;
         try {
-            Property__c p = new Property__c();
+            Property__c p = new Property__c(Price__c=200000, Address__c='123 Test Ave', City__c='Boston', Zip__c='12345');
             insert p;
             User u = getTestUser();
             insert u;

@@ -142,7 +142,7 @@ public class BotTest {
     }
     
     static testMethod void testFindPropertiesByBedrooms() {
-        Property__c p = new Property__c(Name='TestProperty', Beds__c=3, City__c='Boston');
+        Property__c p = new Property__c(Name='TestProperty', Beds__c=3, Address__c='123 Test Ave', City__c='Boston', Zip__c='12345');
         insert p;
         BotHandler handler = new HandlerFindPropertiesByBedrooms();
         BotResponse response = handler.handle('', new String[]{'3', 'Boston'}, null, null, null);
@@ -150,7 +150,7 @@ public class BotTest {
     }
 
     static testMethod void testFindProperties() {
-        Property__c p = new Property__c(Name='TestProperty', Price__c=450000, City__c='Boston');
+        Property__c p = new Property__c(Name='TestProperty', Price__c=450000, Address__c='123 Test Ave', City__c='Boston', Zip__c='12345');
         insert p;
         BotHandler handler = new HandlerFindProperties();
         Map<String, String> session = handler.handle('', null, null, null, null).session;

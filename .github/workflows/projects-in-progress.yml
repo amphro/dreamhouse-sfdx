@@ -79,11 +79,15 @@ jobs:
         if: steps.check.outputs.isMatch == 'true'
         with:
           args: force:org:display --targetusername=new-user --verbose --json
-      - name: Stash credentials for later
+      - name: Create auth file
         if: steps.check.outputs.isMatch == 'true'
         shell: bash
         run: |
-          value=$(node scripts/extract-issue-number.js ${{ github.event.project_card.content_url }})
           result=${{ toJSON(steps.display_org.outputs.result) }}
           sfdxurl=$(echo $result | jq -r .result.sfdxAuthUrl)
-          curl -u ${{ secrets.KVDB_KEY}} -d $sfdxurl ${{ secrets.KVDB_URL }}/$value
+          echo $sfdxurl >> scratch-org-authurl.txt
+      - name: Stash scratch auth file
+        uses: actions/upload-artifact@v1
+        with:
+          name: $(basename ${{ github.event.project_card.content_url }})
+          path: scratch-org-authurl.txt
