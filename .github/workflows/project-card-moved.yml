@@ -8,6 +8,7 @@ jobs:
   project-in-progress:
     runs-on: ubuntu-latest
     container: salesforce/salesforcedx
+    if: contains(github.event.project_card.column_id, "7135609")
     steps:
       - name: Check move from "TODO" to "IN PROGRESS"
         id: check
@@ -33,7 +34,7 @@ jobs:
         run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
       - name: Authenticate against dev hub
         if: steps.check.outputs.isMatch == 'true'
-        run: sfdx force:auth:jwt:grant --clientid $CONSUMERKEY --jwtkeyfile .github/server.key --username $USERNAME --setdefaultdevhubusername -a devhub
+        run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ secrets.USERNAME }} --setdefaultdevhubusername -a devhub
       - name: Initialize scratch org
         if: steps.check.outputs.isMatch == 'true'
         # Generate username from repo and have it in an action so it isn't copied and pasted in scripts
@@ -59,6 +60,7 @@ jobs:
   project-ready-for-review:
     runs-on: ubuntu-latest
     container: salesforce/salesforcedx
+    if: contains(github.event.project_card.column_id, "7135613")
     steps:
       - name: Check move from "IN PROGRESS" to "READY FOR REVIEW"
         id: check
