@@ -73,3 +73,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN}}
           pr_title: ${{ format('Changes from Issue {0}', steps.generate_username.outputs.issue_number)}}
           pr_body: ${{ format('Changes from \#{0}', steps.generate_username.outputs.issue_number)}}
+          source_branch: ${{ format('branch/{0}', steps.generate_username.outputs.issue_number) }}
