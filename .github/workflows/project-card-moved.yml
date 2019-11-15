@@ -36,7 +36,7 @@ jobs:
         if: contains(github.event.project_card.column_id, '7135613')
 
         steps:
-            - name: actions/checkout@v1
+            - uses: actions/checkout@v1
 
             - name: Populate jwt key file
               run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
