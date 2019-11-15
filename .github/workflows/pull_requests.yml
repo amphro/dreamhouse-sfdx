@@ -1,35 +1,30 @@
 name: Start CI
 
 on:
-  pull_request:
-    types: [assigned, opened, synchronize, reopened]
+  push
 
 jobs:
     build:
         runs-on: ubuntu-latest
+        container: salesforce/salesforcedx
 
         steps:
             - uses: actions/checkout@v1
-            - name: Populate auth file with SFDX_URL secret
-              shell: bash
-              run: echo ${{ secrets.DEV_HUB_SFDXURL}} > ./SFDX_URL_STORE.txt
+              
+            - name: Populate jwt key file
+              run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
+              
             - name: Authenticate against dev hub
-              uses: forcedotcom/salesforcedx-actions@master
-              with:
-                  args: force:auth:sfdxurl:store --sfdxurlfile=./SFDX_URL_STORE.txt --setalias=devhub --setdefaultdevhubusername
+              run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ secrets.USERNAME }} --setdefaultdevhubusername -a devhub
+              
             - name: Create scratch org
-              uses: forcedotcom/salesforcedx-actions@master
-              with:
-                  args: force:org:create --definitionfile=config/project-scratch-def.json --setalias=scratch-org --setdefaultusername
+              run: sfdx force:org:create --definitionfile=config/project-scratch-def.json --setalias=scratch-org --setdefaultusername
+              
             - name: Push source
-              uses: forcedotcom/salesforcedx-actions@master
-              with:
-                  args: force:source:push
+              run: sfdx force:source:push
+              
             - name: Run tests
-              uses: forcedotcom/salesforcedx-actions@master
-              with:
-                  args: force:apex:test:run --codecoverage --resultformat=tap
+              run: sfdx force:apex:test:run --codecoverage --resultformat=tap
+              
             - name: Clean up scratch org
-              uses: forcedotcom/salesforcedx-actions@master
-              with:
-                  args: force:org:delete --targetusername=scratch-org --noprompt
+              run: sfdx force:org:delete --targetusername=scratch-org --noprompt
