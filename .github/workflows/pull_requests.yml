@@ -2,7 +2,7 @@ name: 'On Push'
 
 on:
     push:
-        branches: '!master'
+        branches-ignore: 'master'
 
 jobs:
     CI-apex-test-run:
