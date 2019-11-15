@@ -10,88 +10,38 @@ jobs:
     container: salesforce/salesforcedx
     if: contains(github.event.project_card.column_id, '7135609')
     steps:
-      - name: Check move from "TODO" to "IN PROGRESS"
-        id: check
-        uses: vazexqi/salesforcedx-kanban-actions/project_card-check-movement@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fromColumnId: ${{ github.event.changes.column_id.from }}
-          fromColumnName: TODO
-          toColumnId: ${{ github.event.project_card.column_id }}
-          toColumnName: IN PROGRESS
       - name: Check out the source code
         uses: actions/checkout@v1
-        if: steps.check.outputs.isMatch == 'true'
-      - name: Parse issue number
-        id: issue
-        if: steps.check.outputs.isMatch == 'true'
-        shell: bash
-        run: |
-          value=$(basename ${{ github.event.project_card.content_url }})
-          echo ::set-output name=issue_number::$value
       - name: Populate jwt key file
-        if: steps.check.outputs.isMatch == 'true'
         run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
       - name: Authenticate against dev hub
-        if: steps.check.outputs.isMatch == 'true'
         run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ secrets.USERNAME }} --setdefaultdevhubusername -a devhub
+      - name: Generate Username
+        id: generate_username
+        run: scripts/generateEmailFromContentUrl.sh ${{ github.event.project_card.content_url }}
       - name: Initialize scratch org
-        if: steps.check.outputs.isMatch == 'true'
         # Generate username from repo and have it in an action so it isn't copied and pasted in scripts
-        run: scripts/orgInit.sh ci-${{ steps.issue.outputs.issue_number }}@github.amphro.dreamhouse.com
-      - name: Display user information
-        id: display_user
-        if: steps.check.outputs.isMatch == 'true'
-        run: sfdx force:user:display --json
-      - name: Display open url
-        id: display_url
-        if: steps.check.outputs.isMatch == 'true'
-        run: sfdx force:org:open --urlonly --json
-      - name: Generate Email Script
-        if: steps.check.outputs.isMatch == 'true'
-        run: "scripts/generateSendEmailScript.js"
-        env:
-          DISPLAY_USER_JSON: ${{ steps.display_user.outputs.result }}
-          DISPLAY_URL_JSON: ${{ steps.display_url.outputs.result }}
+        run: scripts/orgInit.sh ${{ steps.generate_username.outputs.username }}
       - name: Send Email
-        if: steps.check.outputs.isMatch == 'true'
-        run: sfdx force:apex:execute -f scripts/sendEmail.apex
+        run: scripts/sendEmail.sh
 
   project-ready-for-review:
     runs-on: ubuntu-latest
     container: salesforce/salesforcedx
     if: contains(github.event.project_card.column_id, '7135613')
     steps:
-      - name: Check move from "IN PROGRESS" to "READY FOR REVIEW"
-        id: check
-        uses: vazexqi/salesforcedx-kanban-actions/project_card-check-movement@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN}}
-          fromColumnId: ${{ github.event.changes.column_id.from }}
-          fromColumnName: IN PROGRESS
-          toColumnId: ${{ github.event.project_card.column_id }}
-          toColumnName: READY FOR REVIEW
       - name: Check out the source code
         uses: actions/checkout@v1
-        if: steps.check.outputs.isMatch == 'true'
-      - name: Parse issue number
-        id: issue
-        if: steps.check.outputs.isMatch == 'true'
-        shell: bash
-        run: |
-          value=$(basename ${{ github.event.project_card.content_url }})
-          echo ::set-output name=issue_number::$value
       - name: Populate jwt key file
-        if: steps.check.outputs.isMatch == 'true'
         run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
+      - name: Generate Username
+        id: generate_username
+        run: scripts/generateEmailFromContentUrl.sh ${{ github.event.project_card.content_url }}
       - name: Authenticate scratch org
-        if: steps.check.outputs.isMatch == 'true'
-        run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ci-${{ steps.issue.outputs.issue_number }}@github.amphro.dreamhouse.com --setdefaultusername -a scratch-org
+        run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ steps.generate_username.outputs.username }} --setdefaultusername -a scratch-org -r https://test.salesforce.com
       - name: Retrieve metadata changes
-        if: steps.check.outputs.isMatch == 'true'
         run: sfdx force:source:retrieve --manifest=manifest/package.xml --targetusername=scratch-org
       - name: Commit Git changes
-        if: steps.check.outputs.isMatch == 'true'
         shell: bash
         run: |
           git config --local user.email "action@github.com"
@@ -101,14 +51,12 @@ jobs:
           git commit -m "Add new changes from scratch org"
       - name: Push changes
         uses: vazexqi/github-push-action@master
-        if: steps.check.outputs.isMatch == 'true'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ format('branch/{0}', steps.issue.outputs.issue_number) }}
           force: true
       - name: Create a PR
         uses: vazexqi/salesforcedx-kanban-actions/pulls-create-pr@master
-        if: steps.check.outputs.isMatch == 'true'
         with:
           token: ${{ secrets.GITHUB_TOKEN}}
           owner: ${{ github.event.repository.owner.login }}
