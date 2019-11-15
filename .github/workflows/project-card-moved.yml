@@ -8,7 +8,7 @@ jobs:
   project-in-progress:
     runs-on: ubuntu-latest
     container: salesforce/salesforcedx
-    if: contains(github.event.project_card.column_id, "7135609")
+    if: contains(github.event.project_card.column_id, '7135609')
     steps:
       - name: Check move from "TODO" to "IN PROGRESS"
         id: check
@@ -60,7 +60,7 @@ jobs:
   project-ready-for-review:
     runs-on: ubuntu-latest
     container: salesforce/salesforcedx
-    if: contains(github.event.project_card.column_id, "7135613")
+    if: contains(github.event.project_card.column_id, '7135613')
     steps:
       - name: Check move from "IN PROGRESS" to "READY FOR REVIEW"
         id: check
