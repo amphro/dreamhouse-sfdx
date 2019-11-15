@@ -1,7 +1,8 @@
-name: Start CI
+name: 'CI: Run Apex Tests'
 
 on:
-  push
+  push:
+    branches: '!master'
 
 jobs:
     build:
