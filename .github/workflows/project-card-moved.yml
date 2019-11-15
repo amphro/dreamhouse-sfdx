@@ -1,79 +1,79 @@
-name: Moved Project Card
+name: On Project Card Moved
 
 on:
-  project_card:
-    types: [moved]
+    project_card:
+        types: [moved]
 
 jobs:
-  project-in-progress:
-    runs-on: ubuntu-latest
-    container: salesforce/salesforcedx
-    if: contains(github.event.project_card.column_id, '7135609')
-    steps:
-      - name: Check out the source code
-        uses: actions/checkout@v1
+    to-in-progress:
+        runs-on: ubuntu-latest
+        container: salesforce/salesforcedx
+        if: contains(github.event.project_card.column_id, '7135609')
 
-      - name: Populate jwt key file
-        run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
+        steps:
+            - uses: actions/checkout@v1
 
-      - name: Authenticate against dev hub
-        run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ secrets.USERNAME }} --setdefaultdevhubusername -a devhub
+            - name: Populate jwt key file
+              run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
 
-      - name: Generate Username
-        id: generate_username
-        run: scripts/generateEmailFromContentUrl.sh ${{ github.event.project_card.content_url }}
+            - name: Authenticate against dev hub
+              run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ secrets.USERNAME }} --setdefaultdevhubusername -a devhub
 
-      - name: Initialize scratch org
-        # Generate username from repo and have it in an action so it isn't copied and pasted in scripts
-        run: scripts/orgInit.sh ${{ steps.generate_username.outputs.username }}
+            - name: Generate Username
+              id: generate_username
+              run: scripts/generateEmailFromContentUrl.sh ${{ github.event.project_card.content_url }}
 
-      - name: Send Email
-        run: scripts/sendEmail.sh
+            - name: Initialize scratch org
+              # Generate username from repo and have it in an action so it isn't copied and pasted in scripts
+              run: scripts/orgInit.sh ${{ steps.generate_username.outputs.username }}
 
-  project-ready-for-review:
-    runs-on: ubuntu-latest
-    container: salesforce/salesforcedx
-    if: contains(github.event.project_card.column_id, '7135613')
-    steps:
-      - name: Check out the source code
-        uses: actions/checkout@v1
+            - name: Send Email
+              run: scripts/sendEmail.sh
 
-      - name: Populate jwt key file
-        run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
+    to-ready-for-review:
+        runs-on: ubuntu-latest
+        container: salesforce/salesforcedx
+        if: contains(github.event.project_card.column_id, '7135613')
 
-      - name: Generate Username
-        id: generate_username
-        run: scripts/generateEmailFromContentUrl.sh ${{ github.event.project_card.content_url }}
+        steps:
+            - name: actions/checkout@v1
 
-      - name: Authenticate scratch org
-        run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ steps.generate_username.outputs.username }} --setdefaultusername -a scratch-org -r https://test.salesforce.com
+            - name: Populate jwt key file
+              run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
 
-      - name: Retrieve metadata changes
-        run: sfdx force:source:retrieve --manifest=manifest/package.xml --targetusername=scratch-org
+            - name: Generate Username
+              id: generate_username
+              run: scripts/generateEmailFromContentUrl.sh ${{ github.event.project_card.content_url }}
 
-      - name: Commit Git changes
-        shell: bash
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git checkout -b branch/${{ steps.generate_username.outputs.issue_number }}
-          git add -A
-          git commit -m "Add new changes from scratch org"
+            - name: Authenticate scratch org
+              run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ steps.generate_username.outputs.username }} --setdefaultusername -a scratch-org -r https://test.salesforce.com
 
-      - name: Push changes
-        uses: vazexqi/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ format('branch/{0}', steps.generate_username.outputs.issue_number) }}
-          force: true
+            - name: Retrieve metadata changes
+              run: sfdx force:source:retrieve --manifest=manifest/package.xml --targetusername=scratch-org
 
-      - name: Create a PR
-        uses: vazexqi/salesforcedx-kanban-actions/pulls-create-pr@master
-        with:
-          token: ${{ secrets.GITHUB_TOKEN}}
-          owner: ${{ github.event.repository.owner.login }}
-          repo: ${{ github.event.repository.name }}
-          title: ${{ format('Changes from Issue {0}', steps.generate_username.outputs.issue_number)}}
-          body: ${{ format('Changes from \#{0}', steps.generate_username.outputs.issue_number)}}
-          head: ${{ format('branch/{0}', steps.generate_username.outputs.issue_number)}}
-          base: master
+            - name: Commit Git changes
+              shell: bash
+              run: |
+                  git config --local user.email "action@github.com"
+                  git config --local user.name "GitHub Action"
+                  git checkout -b branch/${{ steps.generate_username.outputs.issue_number }}
+                  git add -A
+                  git commit -m "Add new changes from scratch org"
+
+            - name: Push changes
+              uses: vazexqi/github-push-action@master
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: ${{ format('branch/{0}', steps.generate_username.outputs.issue_number) }}
+                  force: true
+
+            - name: Create a PR
+              uses: vazexqi/salesforcedx-kanban-actions/pulls-create-pr@master
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN}}
+                  owner: ${{ github.event.repository.owner.login }}
+                  repo: ${{ github.event.repository.name }}
+                  title: ${{ format('Changes from Issue {0}', steps.generate_username.outputs.issue_number)}}
+                  body: ${{ format('Changes from \#{0}', steps.generate_username.outputs.issue_number)}}
+                  head: ${{ format('branch/{0}', steps.generate_username.outputs.issue_number)}}
+                  base: master
