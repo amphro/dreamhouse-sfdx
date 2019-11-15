@@ -68,9 +68,12 @@ jobs:
           force: true
 
       - name: Create a PR
-        uses: repo-sync/pull-request@v2
+        uses: vazexqi/salesforcedx-kanban-actions/pulls-create-pr@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN}}
-          pr_title: ${{ format('Changes from Issue {0}', steps.generate_username.outputs.issue_number)}}
-          pr_body: ${{ format('Changes from \#{0}', steps.generate_username.outputs.issue_number)}}
-          source_branch: ${{ format('branch/{0}', steps.generate_username.outputs.issue_number) }}
+          token: ${{ secrets.GITHUB_TOKEN}}
+          owner: ${{ github.event.repository.owner.login }}
+          repo: ${{ github.event.repository.name }}
+          title: ${{ format('Changes from Issue {0}', steps.generate_username.outputs.issue_number)}}
+          body: ${{ format('Changes from \#{0}', steps.generate_username.outputs.issue_number)}}
+          head: ${{ format('branch/{0}', steps.generate_username.outputs.issue_number)}}
+          base: master
