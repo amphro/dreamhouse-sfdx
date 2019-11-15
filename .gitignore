@@ -9,4 +9,4 @@
 .settings
 IlluminatedCloud/
 sendEmail.apex
-github/server.key
+.github/server.key
