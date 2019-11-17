@@ -6,8 +6,8 @@
 private class SalesProcessTests {
 
     /**
-    * Agents will enter properties with no price to indicated they are working with
-    * an opportunities with home owner.
+    * Agents will enter properties with no price for opportunities with new home owner
+    * where the house is not been appraised or put on the maarket yet.
     */
     @isTest
     static void createAndLinkPropertyWithNoPriceToOppurtunity() {
