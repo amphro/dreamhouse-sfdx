@@ -1,7 +1,7 @@
 Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
 
 mail.setSubject('Welcome to your new scratch org');
-mail.setToAddresses(new String[]{'amphro@gmail.com'});
+mail.setToAddresses(new String[]{'ra353023@gmail.com'});
 
 String body = 'Here\'s your personal scratch org info.\n\n' +
 'You can open your org at ${DISPLAY_URL_JSON.result.url}.\n\n' +
