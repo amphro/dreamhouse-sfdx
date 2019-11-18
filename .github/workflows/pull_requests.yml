@@ -2,7 +2,7 @@ name: 'On Push'
 
 on:
     pull_request:
-      types: [opened,synchronize]
+      types: [opened,synchronize,assigned,reopened]
 
 jobs:
     CI-apex-test-run:
