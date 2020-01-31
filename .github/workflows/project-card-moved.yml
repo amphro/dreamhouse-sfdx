@@ -16,6 +16,9 @@ jobs:
             - name: Populate jwt key file
               run: openssl enc -nosalt -aes-256-cbc -d -in .github/server.key.enc -out .github/server.key -base64 -K ${{ secrets.DECRYPTION_KEY }} -iv ${{ secrets.DECRYPTION_IV }}
 
+            - name: Add analytics plugins
+              run: echo '["@salesforce/plugin-analytics"]' > ~.config/sfdx/unsignedPluginWhiteList.json && sfdx plugins:install analytics 
+
             - name: Authenticate against dev hub
               run: sfdx force:auth:jwt:grant --clientid ${{ secrets.CONSUMERKEY }} --jwtkeyfile .github/server.key --username ${{ secrets.USERNAME }} --setdefaultdevhubusername -a devhub
 
