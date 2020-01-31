@@ -20,10 +20,10 @@ jobs:
               run: sfdx --dev-debug
 
             - name: Make condif dir
-              run: test -d /github/home/.config && mkdir /github/home/.config
+              run: test -d /github/home/.config || mkdir /github/home/.config
 
             - name: Make sfdx dir
-              run: test -d /github/home/.config/sfdx && mkdir /github/home/.config/sfdx
+              run: test -d /github/home/.config/sfdx || mkdir /github/home/.config/sfdx
 
             - name: Add analytics plugins
               run: echo '["@salesforce/plugin-analytics"]' > /github/home/.config/sfdx/unsignedPluginWhiteList.json && sfdx plugins:install analytics 
