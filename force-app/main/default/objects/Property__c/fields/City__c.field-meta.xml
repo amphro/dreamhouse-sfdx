@@ -4,7 +4,7 @@
     <externalId>false</externalId>
     <label>City</label>
     <length>50</length>
-    <required>false</required>
+    <required>true</required>
     <trackFeedHistory>false</trackFeedHistory>
     <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>
